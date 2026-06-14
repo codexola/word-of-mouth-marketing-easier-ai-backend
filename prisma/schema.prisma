@@ -1,0 +1,317 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum SourceType {
+  GOOGLE_DRIVE
+  LINE
+  MANUAL
+}
+
+enum PostStatus {
+  NOT_CREATED
+  AI_GENERATED
+  PENDING_REVIEW
+  APPROVED
+  READY_TO_POST
+  POSTED
+  REJECTED
+  CANCELLED
+  ERROR
+}
+
+enum ReviewSendStatus {
+  DRAFT
+  SCHEDULED
+  SENT
+  CANCELLED
+}
+
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  passwordHash    String
+  name            String
+  role            UserRole @default(USER)
+  loginCode       String?
+  signupIp        String?
+  signupLat       Float?
+  signupLng       Float?
+  signupCity      String?
+  signupRegion    String?
+  signupCountry   String?
+  signupLocationLabel String?
+  preferredLocale String   @default("ja")
+  preferredTheme  String   @default("light")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  approvedPosts   ApprovedPost[]   @relation("ApprovedBy")
+  editHistories   PostEditHistory[]
+  approvalLogs    ApprovalLog[]
+  reviewRequests  ReviewRequest[]
+}
+
+model AppSettings {
+  id                  String   @id @default("default")
+  businessProfileUrl  String?
+  reviewRequestUrl    String?
+  serviceAreas        String[] @default([])
+  services            Json     @default("[]")
+  keywords            String[] @default([])
+  ngWords             String[] @default([])
+  toneDescription     String   @default("地域密着で安心感があり、専門業者として信頼感のある、営業感が強すぎない自然な文章")
+  samplePosts         Json     @default("[]")
+  driveFolderId           String?
+  drivePollInterval       Int      @default(1)
+  openaiModel             String   @default("gpt-4o-mini")
+  lineChannelSecret       String?
+  lineChannelAccessToken  String?
+  lineEnabled             Boolean  @default(true)
+  lineAutoSendEnabled     Boolean  @default(false)
+  emailAutoSendEnabled    Boolean  @default(false)
+  emailSendMethod         String   @default("gmail")
+  gmailRefreshToken       String?
+  gmailAccessToken        String?
+  gmailTokenExpiresAt     DateTime?
+  gmailFromEmail          String?
+  smtpHost                String?
+  smtpPort                Int      @default(587)
+  smtpUser                String?
+  smtpPass                String?
+  smtpFrom                String?
+  autoRetryEnabled        Boolean  @default(true)
+  maxRetryAttempts        Int      @default(3)
+  retryIntervalMinutes    Int      @default(30)
+  gbpAutoPostEnabled      Boolean  @default(false)
+  gbpAccountId            String?
+  gbpLocationId           String?
+  gbpLocationName         String?
+  gbpRefreshToken         String?
+  gbpAccessToken          String?
+  gbpTokenExpiresAt       DateTime?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model PostCandidate {
+  id              String     @id @default(cuid())
+  source          SourceType
+  status          PostStatus @default(NOT_CREATED)
+  region          String?
+  workDescription String?
+  serviceType     String?
+  memo            String?
+  lineUserId      String?
+  errorMessage    String?
+  deletedAt       DateTime?
+  archivedAt      DateTime?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  images           PostImage[]
+  generation       PostGeneration?
+  editHistories    PostEditHistory[]
+  versions         PostVersion[]
+  approvalLogs     ApprovalLog[]
+  publicationLogs  PublicationLog[]
+  approvedPost     ApprovedPost?
+
+  @@index([status])
+  @@index([createdAt])
+  @@index([deletedAt])
+}
+
+model PostImage {
+  id              String   @id @default(cuid())
+  postCandidateId String
+  url             String
+  storagePath     String?
+  fileName        String?
+  mimeType        String?
+  sourceFileId    String?  @unique
+  analysisJson    Json?
+  createdAt       DateTime @default(now())
+
+  postCandidate PostCandidate @relation(fields: [postCandidateId], references: [id], onDelete: Cascade)
+
+  @@index([postCandidateId])
+}
+
+model PostVersion {
+  id              String   @id @default(cuid())
+  postCandidateId String
+  versionNo       Int
+  title           String
+  body            String
+  tone            String?
+  instruction     String?
+  prompt          String?
+  rawResponse     Json?
+  createdAt       DateTime @default(now())
+
+  postCandidate PostCandidate @relation(fields: [postCandidateId], references: [id], onDelete: Cascade)
+
+  @@unique([postCandidateId, versionNo])
+  @@index([postCandidateId])
+}
+
+model ApprovalLog {
+  id              String   @id @default(cuid())
+  postCandidateId String
+  userId          String?
+  action          String
+  metadata        Json?
+  createdAt       DateTime @default(now())
+
+  postCandidate PostCandidate @relation(fields: [postCandidateId], references: [id], onDelete: Cascade)
+  user          User?         @relation(fields: [userId], references: [id])
+
+  @@index([postCandidateId])
+}
+
+model PublicationLog {
+  id              String   @id @default(cuid())
+  postCandidateId String
+  approvedPostId  String?
+  action          String
+  gbpPostId       String?
+  errorMessage    String?
+  createdAt       DateTime @default(now())
+
+  postCandidate PostCandidate @relation(fields: [postCandidateId], references: [id], onDelete: Cascade)
+
+  @@index([postCandidateId])
+}
+
+model PostGeneration {
+  id                String   @id @default(cuid())
+  postCandidateId   String   @unique
+  title             String
+  body              String
+  shortBody         String?
+  politeBody        String?
+  regionalBody      String?
+  serviceKeywords   String[] @default([])
+  cautions          String?
+  reviewRequestText String?
+  rawResponse       Json?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  postCandidate PostCandidate @relation(fields: [postCandidateId], references: [id], onDelete: Cascade)
+}
+
+model PostEditHistory {
+  id              String   @id @default(cuid())
+  postCandidateId String
+  userId          String?
+  title           String
+  body            String
+  action          String
+  createdAt       DateTime @default(now())
+
+  postCandidate PostCandidate @relation(fields: [postCandidateId], references: [id], onDelete: Cascade)
+  user          User?         @relation(fields: [userId], references: [id])
+}
+
+model ApprovedPost {
+  id              String     @id @default(cuid())
+  postCandidateId String     @unique
+  title           String
+  body            String
+  region          String?
+  serviceType     String?
+  imageUrls       String[]   @default([])
+  status          PostStatus @default(READY_TO_POST)
+  approvedById    String?
+  approvedAt      DateTime   @default(now())
+  postedAt        DateTime?
+  postedById      String?
+  gbpPostId       String?
+  gbpPublishedAt  DateTime?
+  errorMessage    String?
+  gbpRetryCount   Int        @default(0)
+  gbpNextRetryAt  DateTime?
+  gbpLastErrorAt  DateTime?
+  archivedAt      DateTime?
+  archiveSnapshot Json?
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  postCandidate PostCandidate @relation(fields: [postCandidateId], references: [id], onDelete: Cascade)
+  approvedBy    User?         @relation("ApprovedBy", fields: [approvedById], references: [id])
+
+  @@index([gbpNextRetryAt])
+}
+
+model SyncedDriveFile {
+  id           String   @id @default(cuid())
+  driveFileId  String   @unique
+  fileName     String
+  mimeType     String?
+  postCandidateId String?
+  syncedAt     DateTime @default(now())
+}
+
+model LineMessageBuffer {
+  id         String   @id @default(cuid())
+  lineUserId String
+  messageType String
+  content    String?
+  imageUrl   String?
+  messageId  String?
+  processed  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([lineUserId, processed])
+  @@index([messageId])
+}
+
+model ReviewRequest {
+  id                    String           @id @default(cuid())
+  customerName          String
+  completionDate        DateTime
+  lineUserId            String?
+  customerEmail         String?
+  reviewUrl             String?
+  thankMessage          String?
+  reviewMessage         String?
+  followUpMessage       String?
+  scheduledSendDate     DateTime?
+  thankScheduledDate    DateTime?
+  reviewScheduledDate   DateTime?
+  followUpScheduledDate DateTime?
+  thankSentAt           DateTime?
+  reviewSentAt          DateTime?
+  followUpSentAt        DateTime?
+  thankEmailSentAt      DateTime?
+  reviewEmailSentAt     DateTime?
+  followUpEmailSentAt   DateTime?
+  sendStatus            ReviewSendStatus @default(DRAFT)
+  sendError             String?
+  retryCount            Int              @default(0)
+  nextRetryAt           DateTime?
+  lastErrorAt           DateTime?
+  createdById           String?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  createdBy User? @relation(fields: [createdById], references: [id])
+
+  @@index([sendStatus])
+  @@index([thankScheduledDate])
+  @@index([reviewScheduledDate])
+  @@index([followUpScheduledDate])
+  @@index([nextRetryAt])
+}

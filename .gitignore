@@ -1,0 +1,13 @@
+node_modules/
+dist/
+uploads/
+.env
+.env.local
+.env.*.local
+*.log
+credentials*.json
+*-*.json
+!package.json
+!tsconfig.json
+.DS_Store
+Thumbs.db
