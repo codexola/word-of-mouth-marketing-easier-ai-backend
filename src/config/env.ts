@@ -12,6 +12,7 @@ const envSchema = z.object({
     .string()
     .optional()
     .transform((v) => v !== "false" && v !== "0"),
+  DIRECT_URL: z.string().optional(),
   DATABASE_URL: z.string(),
   JWT_SECRET: z.string().min(16),
   JWT_EXPIRES_IN: z.string().default("7d"),

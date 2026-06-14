@@ -1,4 +1,5 @@
-import OpenAI from "openai";
+import { OpenAI } from "openai";
+import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { env } from "../config/env.js";
 import { getSettings } from "./settings.service.js";
 
@@ -213,7 +214,7 @@ export async function generatePostContent(
   const visionUrls = filterOpenAiImageUrls(input.imageUrls);
 
   try {
-    const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
+    const messages: ChatCompletionMessageParam[] = [
       { role: "system", content: "JSON形式のみで回答する日本語のライターです。" },
       { role: "user", content: prompt },
     ];

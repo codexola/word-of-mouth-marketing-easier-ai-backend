@@ -66,6 +66,28 @@ PUBLIC_API_URL=http://103.179.45.111:4000
 
 詳細はフロントエンドリポジトリの `VERCEL.md` を参照。
 
+## Vercel（バックエンド）デプロイ
+
+> **推奨:** 本番は VPS（`103.179.45.111:4000`）で常時起動。Drive ポーリング・cron・`uploads/` 保存は Vercel では動きません。
+
+ビルドエラー修正済み。Vercel に接続する場合:
+
+1. GitHub リポジトリ `word-of-mouth-marketing-easier-ai-backend` をインポート
+2. **Framework Preset:** Other（`vercel.json` を使用）
+3. **環境変数**（Vercel Dashboard → Settings → Environment Variables）:
+
+| 変数 | 必須 |
+|------|------|
+| `DATABASE_URL` | Neon pooler URL |
+| `DIRECT_URL` | Neon direct URL |
+| `JWT_SECRET` | 16文字以上 |
+| `FRONTEND_URL` | Vercel フロント URL |
+| `ALLOW_VERCEL_ORIGINS` | `true` |
+| `OPENAI_API_KEY` | OpenAI 用 |
+| `PUBLIC_API_URL` | 公開 API URL |
+
+4. Redeploy
+
 ## API
 
 - ヘルスチェック: `GET /api/health`
