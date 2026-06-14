@@ -6,13 +6,13 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
-    "vercel-build": "prisma generate && npm run build",
-    "postinstall": "prisma generate",
+    "vercel-build": "npx prisma generate && npm run build",
+    "postinstall": "npx prisma generate",
     "start": "node dist/index.js",
-    "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:push": "prisma db push",
-    "db:push:quick": "prisma db push --skip-generate",
+    "db:generate": "npx prisma generate",
+    "db:migrate": "npx prisma migrate dev",
+    "db:push": "npx prisma db push",
+    "db:push:quick": "npx prisma db push --skip-generate",
     "db:seed": "tsx prisma/seed.ts",
     "db:setup": "node scripts/setup-database.mjs && prisma db push && tsx prisma/seed.ts",
     "db:test": "node scripts/test-connection.mjs",
@@ -30,6 +30,7 @@
     "nodemailer": "^8.0.11",
     "openai": "4.104.0",
     "pg": "^8.16.0",
+    "prisma": "^6.8.2",
     "zod": "^3.25.28"
   },
   "overrides": {
@@ -49,7 +50,6 @@
     "@types/node": "^22.15.21",
     "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^8.0.1",
-    "prisma": "^6.8.2",
     "tsx": "^4.19.4",
     "typescript": "^5.8.3"
   }
