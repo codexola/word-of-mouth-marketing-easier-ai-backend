@@ -31,13 +31,14 @@
     "openai": "4.104.0",
     "pg": "^8.16.0",
     "prisma": "^6.8.2",
+    "typescript": "^5.8.3",
     "zod": "^3.25.28"
   },
   "overrides": {
     "uuid": "^11.1.0"
   },
   "engines": {
-    "node": ">=18"
+    "node": "20.x"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -50,7 +51,6 @@
     "@types/node": "^22.15.21",
     "@types/node-cron": "^3.0.11",
     "@types/nodemailer": "^8.0.1",
-    "tsx": "^4.19.4",
-    "typescript": "^5.8.3"
+    "tsx": "^4.19.4"
   }
 }

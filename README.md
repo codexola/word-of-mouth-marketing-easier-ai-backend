@@ -88,6 +88,20 @@ PUBLIC_API_URL=http://103.179.45.111:4000
 
 4. Redeploy
 
+**必須の Vercel 環境変数:**
+
+```env
+DATABASE_URL=postgresql://...@...-pooler.../dbname?sslmode=require
+DIRECT_URL=postgresql://...@.../dbname?sslmode=require
+JWT_SECRET=your-secret-min-16-chars
+FRONTEND_URL=https://word-of-mouth-marketing-easier-ai.vercel.app
+ALLOW_VERCEL_ORIGINS=true
+OPENAI_API_KEY=sk-...
+PUBLIC_API_URL=https://your-backend.vercel.app
+```
+
+`DIRECT_URL` が未設定だと Prisma が起動時に失敗します。
+
 ## API
 
 - ヘルスチェック: `GET /api/health`
