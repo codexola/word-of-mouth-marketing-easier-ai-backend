@@ -23,10 +23,24 @@ npm start
 
 `.env.example` を参照。最低限:
 
-- `DATABASE_URL` — PostgreSQL 接続文字列
+- `DATABASE_URL` — PostgreSQL 接続文字列（Neon では **pooler** URL）
+- `DIRECT_URL` — Neon の **direct** URL（`prisma db push` / migrate 用）
 - `JWT_SECRET` — 認証用シークレット
 - `FRONTEND_URL` — フロントエンド URL（CORS）
 - `PUBLIC_API_URL` — 画像 URL 生成用の公開 API ベース URL
+
+### Neon PostgreSQL
+
+1. Neon コンソールで **pooled** と **direct** の接続文字列を取得
+2. `.env` に設定（`sslmode=require` を付与。`channel_binding=require` は Node/Prisma で問題が出る場合は省略可）
+3. スキーマ同期:
+
+```bash
+npm run db:push
+npm run db:seed
+```
+
+Neon の **Data API**（REST）は本バックエンドでは使用しません。Prisma が PostgreSQL に直接接続します。
 
 ## Vercel（フロントエンド）との連携
 

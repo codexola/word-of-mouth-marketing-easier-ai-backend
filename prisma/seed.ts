@@ -80,7 +80,7 @@ async function main() {
       toneDescription:
         "地域密着で安心感があり、専門業者として信頼感のある、営業感が強すぎない自然に相談につながる文章",
       samplePosts: defaultSamplePosts,
-      drivePollInterval: 5,
+      drivePollInterval: 1,
     },
   });
 
