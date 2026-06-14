@@ -42,6 +42,8 @@ npm run db:seed
 
 Neon の **Data API**（REST）は本バックエンドでは使用しません。Prisma が PostgreSQL に直接接続します。
 
+# Vercel デプロイ: `VERCEL.md` を参照
+
 ## Vercel（フロントエンド）との連携
 
 バックエンドは **Vercel ではなく自社サーバー** で常時起動します（Drive ポーリング・ファイル保存・cron のため）。
